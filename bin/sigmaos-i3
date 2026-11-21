@@ -1,0 +1,41 @@
+#!/usr/bin/env bash
+# sigmaos-i3 — SigmaOS component manager for i3 (i3 window manager).
+set -euo pipefail
+APP="i3"
+PKG="i3-wm"
+BIN="i3"
+CFGDIR="$HOME/.config/i3"
+CFGFILE="config"
+HERE="$(cd "$(dirname "$0")" && pwd)"
+
+log() { echo "sigmaos-i3: $*" >&2; }
+
+cmd="${1:-status}"
+case "$cmd" in
+  install)
+    if command -v pacman >/dev/null 2>&1; then
+      if pacman -Q "$PKG" >/dev/null 2>&1; then log "$PKG already installed"; else
+        log "installing $PKG via pacman"; sudo pacman -S --needed --noconfirm "$PKG" || { log "pacman failed; try AUR/helper for $PKG"; exit 1; }
+      fi
+    else log "pacman not found; install $PKG manually"; fi
+    mkdir -p "$CFGDIR"
+    [ -f "$HERE/../config/$CFGFILE" ] && cp -n "$HERE/../config/$CFGFILE" "$CFGDIR/$CFGFILE" 2>/dev/null || true
+    log "installed $APP"
+    ;;
+  deploy)
+    mkdir -p "$CFGDIR"
+    if [ -d "$HERE/../config" ]; then cp -r "$HERE/../config/." "$CFGDIR/" && log "deployed config -> $CFGDIR"; fi
+    ;;
+  status)
+    if command -v "$BIN" >/dev/null 2>&1 || [ -x "/usr/bin/$BIN" ]; then echo "$APP binary: OK ($BIN)"; else echo "$APP binary: not found"; fi
+    [ -d "$CFGDIR" ] && echo "config dir: $CFGDIR" || echo "config dir: (not created)"
+    pacman -Q "$PKG" >/dev/null 2>&1 && echo "package: $PKG installed" || echo "package: $PKG not installed"
+    ;;
+  reset)
+    rm -rf "$CFGDIR" && log "removed $CFGDIR"
+    ;;
+  open|launch)
+    command -v "$BIN" >/dev/null 2>&1 && exec "$BIN" "${@:2}" || { log "$BIN not installed"; exit 1; }
+    ;;
+  *) echo "usage: sigmaos-i3 install|deploy|status|reset|open [args]" >&2; exit 2;;
+esac

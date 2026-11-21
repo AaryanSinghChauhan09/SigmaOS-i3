@@ -2,15 +2,15 @@
 name = "SigmaOS-i3"
 tier = 2
 stability = "beta"
-language = "rust"
-description = "No GitHub description is set; component scope remains unclassified."
+language = "shell"
+description = "SigmaOS integration for i3 window manager: package management, config deployment, and CLI helpers."
 upstream = []
 
 [contract]
-provides = ["component"]
+provides = ["app-manager:i3"]
 depends_on = []
 
 [maturity]
 status = "Implemented"
-test_evidence = "Compiles and passes AAA unit tests"
-next_milestone = "Hardware and runtime integration"
+test_evidence = "test.sh: syntax + metadata + isolated-HOME lifecycle checks"
+next_mestone = "Per-app config polish"
